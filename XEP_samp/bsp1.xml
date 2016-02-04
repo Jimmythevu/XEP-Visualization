@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<executionPlan rows='0' statementType='delete' totalCosts='48211.383' totalCostsCPU='630414912.000' totalCostsIO='13980.912' xmlns='http://www.minet.uni-jena.de/dbis/XEP'>
+	<multiObjectAccess costs='0.003' costsCPU='2580.385' costsIO='0.001' filterPredicateText='$PREDICATE' multiObjectAccessType='rowSet' projection='' rows='0.334'>
+		<generatedRowAccess costs='0.001' costsCPU='120.000' costsIO='0.000' projection='' rows='1.000'/>
+		<tableDelete costs='40630.525' costsCPU='78000030.468' costsIO='6000.000' projection='' rows='6000.000' tableName='CUSTOMER_CASCADE' tableSchema='CEEKAY' tableType='table'>
+			<join alias='$QUERY9' costs='0.000' costsCPU='11.727' costsIO='0.001' joinMethod='nestedLoop' projection='$QUERY9.$COLUMN2, $QUERY9.$COLUMN2' rows='6000.000'>
+				<left>
+					<tableAccess costs='0.018' costsCPU='33996.999' costsIO='0.000' projection='' rows='1.000' tableAccessType='TBSCAN' tableName='tempTable7.0' tableSchema='CEEKAY' tableType='tempTable'>
+						<tableInsert costs='0.007' costsCPU='12645.000' costsIO='0.000' projection='$QUERY6.$COLUMN1' rows='1.000' tableName='tempTable7.0' tableSchema='CEEKAY' tableType='tempTable'>
+							<tableDelete costs='6.772' costsCPU='13000.000' costsIO='1.000' projection='$QUERY6.$COLUMN2, $QUERY6.$COLUMN2' rows='1.000' tableName='NATION' tableSchema='CEEKAY' tableType='table'>
+								<indexAccess accessPredicateText='($QUERY5.N_NATIONKEY = ?) AND ($QUERY5.N_NATIONKEY = ?)' alias='$QUERY6' baseTableName='NATION' baseTableSchema='CEEKAY' costs='0.024' costsCPU='45087.999' costsIO='0.000' indexAccessType='IXSCAN' indexName='SQL130920104643150' indexSchema='SYSIBM' indexType='index' projection='$QUERY6.$COLUMN2, $QUERY6.$COLUMN2' rows='1.000'/>
+							</tableDelete>
+						</tableInsert>
+					</tableAccess>
+				</left>
+				<right>
+					<tableAccess costs='6155.835' costsCPU='245265960.417' costsIO='6795.000' filterPredicateText='? = $QUERY8.C_NATIONKEY' projection='$QUERY8.$ROWID' rows='6000.000' tableAccessType='FETCH' tableName='CUSTOMER_CASCADE' tableSchema='CEEKAY' tableType='table'>
+						<indexAccess alias='$QUERY8' baseTableName='CUSTOMER_CASCADE' baseTableSchema='CEEKAY' costs='816.922' costsCPU='262610311.881' costsIO='703.753' indexAccessType='IXSCAN' indexName='CUSTOMER_CASCADE_PK' indexSchema='CEEKAY' indexType='index' projection='$QUERY8.$ROWID' rows='150000.000'/>
+					</tableAccess>
+				</right>
+			</join>
+		</tableDelete>
+		<multiObjectAccess costs='6.822' costsCPU='108203.998' costsIO='1.001' filterPredicateText='$PREDICATE' multiObjectAccessType='rowSet' projection='' rows='0.040'>
+			<tableAccess costs='0.000' costsCPU='0.000' costsIO='0.000' projection='' rows='6000.000' tableAccessType='' tableName='tempTable7.0' tableSchema='CEEKAY' tableType='tempTable'>
+				<indexAccess accessPredicateText='(? = $QUERY12.C_NATIONKEY) AND (? = $QUERY12.C_NATIONKEY)' baseTableName='CUSTOMER' baseTableSchema='CEEKAY' costs='60.208' costsCPU='10526051.794' costsIO='16.744' indexAccessType='IXSCAN' indexName='IDX_C_NATIONKEY' indexSchema='CEEKAY' indexType='index' projection='' rows='6000.000'/>
+			</tableAccess>
+			<tableAccess costs='428.760' costsCPU='16150969.683' costsIO='409.082' filterPredicateText='? = $QUERY14.S_NATIONKEY' projection='' rows='400.000' tableAccessType='FETCH' tableName='SUPPLIER' tableSchema='CEEKAY' tableType='table'>
+				<indexAccess alias='$QUERY14' baseTableName='SUPPLIER' baseTableSchema='CEEKAY' costs='105.492' costsCPU='17645941.654' costsIO='54.334' indexAccessType='IXSCAN' indexName='SQL130920104646040' indexSchema='SYSIBM' indexType='index' projection='$QUERY14.$ROWID' rows='10000.000'/>
+			</tableAccess>
+		</multiObjectAccess>
+	</multiObjectAccess>
+</executionPlan>
