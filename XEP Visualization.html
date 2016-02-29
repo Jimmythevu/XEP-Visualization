@@ -3,27 +3,53 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <script src="http:d3js.org/d3.v3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> 
 <style type="text/css">
 
 
 
 
 .node text {
-  font-size: 11px;
+  font-size: 13px;
 }
-
 
 path.link {
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
 }
+  
+.additionalParentLink {
+    fill: none;
+    stroke: blue;
+    stroke-width: 1.5px;
+}
 
+.node rect{
+	fill: blue;
+}
+  
 </style>
 </head>
 <body>
-<div id="body"></div>
-<div id="footer"></div>
-<script type="text/javascript" src = "src/Script.js"></script>
+<div id="option" align = "right">
+    <input name="updateButton" 
+           type="button" 
+           value="Normal" 
+           onclick="update()" />
+</div> 
+<div id="option" align = "right">
+    <input name="updateButton" 
+           type="button" 
+           value="Evaluate Costs" 
+           onclick="evaCosts()" />
+</div>
+<div id="option"align = "right">
+    <input name="updateButton" 
+           type="button" 
+           value="Evaluate Rows" 
+           onclick="evaRows()" />
+</div>
+</div><script type="text/javascript" src = "src/Script.js"></script>
   </body>
 </html>

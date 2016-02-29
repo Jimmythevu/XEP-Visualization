@@ -5,13 +5,12 @@
 var selection = d3.xml("XEP_samp/bsp1.xml", function(error, data) {
 	if (error) console.log(error);
 	var JsonData = xmlToJSON(data)
-	//console.log(JsonData)
 	update(root = JsonData)
-
 });
 
 
 //-------------------------------------------------------------------------------- 	
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //change XML to JASON
 function xmlToJSON(xml) {
@@ -42,82 +41,89 @@ function xmlToJSON(xml) {
 }
 
 
-//-------------------------------------------------
-	var margin = {
-	top: 20,
-	right: 120,
-	bottom: 20,
-	left: 120
-	},
-	width = 1200 - margin.right - margin.left,
-	height = 1400 - margin.top - margin.bottom;
-	var i = 0,
-		root,
-		duration = 750,
-		rectW = 180,
-		rectH = 120;
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	var tree = d3.layout.tree().nodeSize([200, 50]);
-	var diagonal = d3.svg.diagonal()
-		.projection(function (d) {
-		return [d.x + rectW / 2, d.y + rectH / 2];
-	});
+var margin = {
+top: 20,
+right: 120,
+bottom: 20,
+left: 120
+},
+width = 1200 - margin.right - margin.left,
+height = 1400 - margin.top - margin.bottom;
+var i = 0,
+	root,
+	duration = 750,
+	rectW = 180,
+	rectH = 120;
 
-	var leftSVG = d3.select("#body")
-		.append("svg")
-		.attr("width", 25 + "%")
-		.attr("height", 1000)
-		.attr("border", 1)
-		.style("float", "left");
-   
-	var borderPath = d3.select("svg").append("rect")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("height", 1000)
-		.attr("width", 100 + "%" )
-		.style("stroke", "black")
-		.style("fill", "none")
-		.style("stroke-width", 1);   
-	
-   
-var svg = d3.select("#body").append("svg").attr("width", 75 + "%").attr("height", 1000).style("float", "right")
+var tree = d3.layout.tree().nodeSize([200, 50]);
+var diagonal = d3.svg.diagonal()
+	.projection(function (d) {
+	return [d.x + rectW / 2, d.y + rectH / 2];
+});
+
+var leftSVG = d3.select("body")
+	.append("svg")
+	.attr("width", 25 + "%")
+	.attr("height", 1000)
+	.attr("border", 1)
+	.style("float", "left");
+
+var borderPath = d3.select("svg").append("rect")
+	.attr("x", 0)
+	.attr("y", 0)
+	.attr("height", 1000)
+	.attr("width", 100 + "%" )
+	.style("stroke", "black")
+	.style("fill", "none")
+	.style("stroke-width", 1);   
+
+
+var svg = d3.select("body").append("svg").attr("id", "graph").attr("width", 75 + "%").attr("height", 1000).style("float", "right")
     .call(zm = d3.behavior.zoom().scaleExtent([0.25,3]).on("zoom", redraw)).on("dblclick.zoom", null).append("g")
     .attr("transform", "translate(" + 300 + "," + 50 + ")");
 	
 
 //necessary so that zoom knows where to zoom and unzoom from
 zm.translate([300, 50]);
+var nodes,
+	links,
+	node,
+	nodeEnter,
+	nodeUpdate,
+	additionalLink;
 
-
-//-------------------------------------------------------------------------------- 
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 function update(source) {
     // Compute the new tree layout.
-    var nodes = tree.nodes(root).reverse();
-        links = tree.links(nodes);
-
-	
-
+    nodes = tree.nodes(root).reverse();
+    links = tree.links(nodes);
+		
+	if (additionalLink){
+		additionalLink.style("visibility","hidden")
+	}
     // Normalize for fixed-depth.
     nodes.forEach(function (d) {
         d.y = d.depth * 150;
     });
 
     // Update the nodes…
-    var node = svg.selectAll("g.node")
+    node = svg.selectAll("g.node")
         .data(nodes, function (d) {
         return d.id || (d.id = ++i);
     });
 	
 
     // Enter any new nodes at the parent's previous position.
-    var nodeEnter = node.enter().append("g")
+    nodeEnter = node.enter().append("g")
         .attr("class", "node")
         .attr("transform", function (d) {
         return "translate(" + d.x + "," + d.y + ")";
-    })
-        .on("click", click)
+    });
+    node.on("click", click)
 		.on("mouseover", mouseover)
 		.on("dblclick", dblclick)
 		.on("mouseout", mouseout);
@@ -126,21 +132,21 @@ function update(source) {
 
     nodeEnter.append("rect")
         .attr("width", rectW)
+		.attr("class","rect" )
         .attr("height", rectH)
         .attr("stroke", "white")
         .attr("stroke-width", 1)
 		.on ("mouseover", function (){
 		tmpFill = d3.select(this);
-		tmpFill.style("fill", "grey");
+		if (this.attributes.style != "fill: white;")tmpFill.style("fill", "grey");
 		})
 		.on ("mouseout", function (){
-		tmpFill.style("fill", "white");
+		if (this.attributes.style != "fill: red")tmpFill.style("fill", "white");
 		})
         .style("fill", function (d) {
         return d._children ? "lightsteelblue" : "#fff";
-		});
-		
-
+		})
+		;
 	
 		
 		
@@ -228,7 +234,7 @@ function update(source) {
 
 		
     // Transition nodes to their new position.
-    var nodeUpdate = node.transition()
+    nodeUpdate = node.transition()
         .duration(duration)
         .attr("transform", function (d) {
         return "translate(" + d.x + "," + d.y + ")";
@@ -259,10 +265,6 @@ function update(source) {
     nodeExit.select("rect")
         .attr("width", rectW)
         .attr("height", rectH)
-    //.attr("width", bbox.getBBox().width)""
-    //.attr("height", bbox.getBBox().height)
-    .attr("stroke", "black")
-        .attr("stroke-width", 1);
 
     nodeExit.select("text");
 
@@ -327,7 +329,6 @@ function update(source) {
 		;
 	
 
-	console.log(link)
     // Enter any new links at the parent's previous position.
     link.enter().insert("path", "g")
         .attr("class", "link")
@@ -369,94 +370,206 @@ function update(source) {
         d.x0 = d.x;
         d.y0 = d.y;
     });
+	
+	svg.selectAll("path.additionalParentLink").style("visibility", "hidden")
+	var couplingParent1;
+	nodes.forEach(function(d){
+		if (d.tagName == "tableInsert"){
+			var tmp = d.attributes.tableName;
+			nodes.forEach(function(c){
+				if (c.tagName == "tableAccess" && c.attributes.tableName == tmp && (c.children == undefined || c.children[0].tagName != "tableInsert")){
+					couplingParent1 = c;
+				}
+			})
+		}
+	});
 
+	var couplingChild1;
+	nodes.forEach(function(d){
+		if (d.tagName == "tableInsert" && d.attributes.tableName == couplingParent1.attributes.tableName ){ couplingChild1 = d}
+	});
+
+	multiParents = [{
+		parent: couplingParent1,
+		child: couplingChild1
+	}];
+
+	additionalLink = multiParents.forEach(function(multiPair){
+		svg.append("path", "g")
+		.attr("class", "additionalParentLink")
+		.style("visibility", "visible")
+		.attr("d", function(){
+			var oTarget = {
+				x:multiPair.parent.x0,
+				y:multiPair.parent.y0
+			};
+			var oSource = {
+				x: multiPair.child.x0,
+				y: multiPair.child.y0
+			};
+			return diagonal ({
+				source: oSource,
+				target: oTarget
+			});
+		});
+	});	
+	
 }
-
-	// Collapse tree on double click.
-	function dblclick(d) {
-		if (d.children) {
-			d._children = d.children;
-			d.children = null;
-		} else {
-			d.children = d._children;
-			d._children = null;
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+function evaCosts(){
+//coloured nodes for evaluation	
+	var totalCosts;
+    nodes.forEach(function (d) {
+		if (d.tagName == "executionPlan"){totalCosts = d.attributes.totalCosts}
+    });
+		
+		node.transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+        return "translate(" + d.x + "," + d.y + ")";
+		})
+		.select("rect")
+        .attr("width", rectW)
+        .attr("height", rectH)
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+         .style("fill", function (d) {
+        if (d.tagName != "executionPlan" && d.tagName != undefined)  {			
+				if (d.attributes.costs >= 0 && d.attributes.costs < totalCosts*0.1){return "#3C3"} 							//best
+				else if(d.attributes.costs >= totalCosts *0.1 && d.attributes.costs < totalCosts*0.25){return "#9C3"}		//very good
+				else if(d.attributes.costs >= totalCosts *0.25 && d.attributes.costs < totalCosts*0.40){return "#CC3"}		//good
+				else if(d.attributes.costs >= totalCosts *0.40 && d.attributes.costs < totalCosts*0.60){return "#FC3"}		//fair
+				else if(d.attributes.costs >= totalCosts *0.60 && d.attributes.costs < totalCosts*0.75){return "#F63"}		//bad
+				else if(d.attributes.costs >= totalCosts *0.75 && d.attributes.costs < totalCosts*0.90){return "#F33"}		//very bad
+				else {return"#C00"}																							//worst
+			
 		}
-		update(d);
-	}
-
-
-	var tooltip2 = d3.select("body").append("div")
-		.attr("class", "tooltip2")
-		.style("width", 20 + "%")
-		.style({position:"absolute",
-			visibility:"hidden"});
-
-	//tooltip on click				
-	function click (d){
-		var content2 ="";
-		if (d.attributes){
-		  content2 +=
-			d3.entries(d.attributes).map(function(o){
-			  return "<dt>"+o.key+ ": " + o.value + "</dt>"
-		  } ).join(" ");
+		else {return "#fff"};
+		}); 
+}
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+function evaRows(){
+//coloured nodes for row evaluation	
+	var totalRows = 0.0;
+    nodes.forEach(function (d) {
+		if (d.tagName != undefined){
+			if (totalRows < d.attributes.rows) {totalRows = d.attributes.rows}
 		}
-		if (d.textContent) {
-		 content2 += "<dt>Text</dt><dd>"+
-		   d.textContent+"</dd>";
+
+    });
+		console.log(totalRows)
+		
+		node.transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+        return "translate(" + d.x + "," + d.y + ")";
+		})
+		.select("rect")
+        .attr("width", rectW)
+        .attr("height", rectH)
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+        .style("fill", function (d) {
+        if (d.tagName != "executionPlan" && d.tagName != undefined)  {			
+				if (d.attributes.rows >= 0 && d.attributes.rows < totalRows*0.1){return "#3C3"} 						//best
+				else if(d.attributes.rows >= totalRows *0.1 && d.attributes.rows < totalRows*0.25){return "#9C3"}		//very good
+				else if(d.attributes.rows >= totalRows *0.25 && d.attributes.rows < totalRows*0.40){return "#CC3"}		//good
+				else if(d.attributes.rows >= totalRows *0.40 && d.attributes.rows < totalRows*0.60){return "#FC3"}		//fair
+				else if(d.attributes.rows >= totalRows *0.60 && d.attributes.rows < totalRows*0.75){return "#F63"}		//bad
+				else if(d.attributes.rows >= totalRows *0.75 && d.attributes.rows < totalRows*0.90){return "#F33"}		//very bad
+				else {return"#C00"}																						//worst
+			
 		}
-		tooltip2.html(content2);
-		tooltip2.style("visibility", "visible")
-			.style("left", 10 + "px")
-			.style("top", 10 + "px");
-
-	}
-
-
-
- // hide tooltip when mouse outline
-function mouseout (d){
-	tooltip.style("visibility", "hidden")
-	tooltip2.style("visibility", "visible")
-	}
-	
-	
-
+		else {return "#fff"};
+    });
+}	
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Show tooltip when mouse over		
 var tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
+		.attr("class", "tooltip")
 		.attr("stroke", "black")
-        .attr("stroke-width", 1)
+		.attr("stroke-width", 1)
 		.style("width", 20 + "%")
-        .style({position:"absolute",
-               visibility:"hidden"});
+		.style({position:"absolute",
+			   visibility:"hidden"});
 			   
 			   
 function mouseover (d){
 
-    var content ="";
-    if (d.attributes){
-      content +=
-        d3.entries(d.attributes).map(function(o){
-          return "<dt>"+o.key+ ": " + o.value + "</dt>"
-      } ).join(" ");
-    }
-    if (d.textContent) {
-     content += "<dt>Text</dt><dd>"+
-       d.textContent+"</dd>";
-    }
-    tooltip.html(content);
+	var content ="";
+	if (d.attributes){
+	  content +=
+		d3.entries(d.attributes).map(function(o){
+		  return "<dt>"+o.key+ ": " + o.value + "</dt>"
+	  } ).join(" ");
+	}
+	if (d.textContent) {
+	 content += "<dt>Text</dt><dd>"+
+	   d.textContent+"</dd>";
+	}
+	tooltip.html(content);
 	tooltip2.style("visibility", "hidden")
-    tooltip.style("visibility", "visible")
+	tooltip.style("visibility", "visible")
 			.style("left", window.pageXOffset + 10 + "px")
 			.style("top", window.pageYOffset + 10 + "px");		
  }
-	
-  
-  
+
+
+
+var tooltip2 = d3.select("body").append("div")
+	.attr("class", "tooltip2")
+	.style("width", 20 + "%")
+	.style({position:"absolute",
+		visibility:"hidden"});
+
+//tooltip on click				
+function click (d){
+	var content2 ="";
+	if (d.attributes){
+	  content2 +=
+		d3.entries(d.attributes).map(function(o){
+		  return "<dt>"+o.key+ ": " + o.value + "</dt>"
+	  } ).join(" ");
+	}
+	if (d.textContent) {
+	 content2 += "<dt>Text</dt><dd>"+
+	   d.textContent+"</dd>";
+	}
+	tooltip2.html(content2);
+	tooltip.style("visibility", "hidden")
+	tooltip2.style("visibility", "visible")
+		.style("left", 10 + "px")
+		.style("top", 10 + "px");
+
+}
+
+
+
+// hide tooltip when mouse outline
+function mouseout (d){
+	tooltip.style("visibility", "hidden")
+	tooltip2.style("visibility", "visible")
+	}
+
+
+// Collapse tree on double click.
+function dblclick(d) {
+	if (d.children) {
+		d._children = d.children;
+		d.children = null;
+	} else {
+		d.children = d._children;
+		d._children = null;
+	}
+	update(d);
+}
+
 //Redraw for zoom
 function redraw() {
- // console.log("here", d3.event.translate, d3.event.scale);
   svg.attr("transform",
-      "translate(" + d3.event.translate + ")"
-      + " scale(" + d3.event.scale + ")");
+	  "translate(" + d3.event.translate + ")"
+	  + " scale(" + d3.event.scale + ")");
 }
+
+//-------------------------------------------------------------------------------- 
+
