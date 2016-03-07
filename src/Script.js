@@ -9,7 +9,9 @@ var selection = d3.xml("XEP_samp/bsp1.xml", function(error, data) {
 });
 
 
-//-------------------------------------------------------------------------------- 	
+ 	
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //change XML to JASON
@@ -53,7 +55,7 @@ width = 1200 - margin.right - margin.left,
 height = 1400 - margin.top - margin.bottom;
 var i = 0,
 	root,
-	duration = 750,
+	duration = 1000,
 	rectW = 180,
 	rectH = 120;
 
@@ -63,7 +65,7 @@ var diagonal = d3.svg.diagonal()
 	return [d.x + rectW / 2, d.y + rectH / 2];
 });
 
-var leftSVG = d3.select("body")
+/* var leftSVG = d3.select("body")
 	.append("svg")
 	.attr("width", 25 + "%")
 	.attr("height", 1000)
@@ -77,22 +79,23 @@ var borderPath = d3.select("svg").append("rect")
 	.attr("width", 100 + "%" )
 	.style("stroke", "black")
 	.style("fill", "none")
-	.style("stroke-width", 1);   
+	.style("stroke-width", 1);    */
 
 
 var svg = d3.select("body").append("svg").attr("id", "graph").attr("width", 75 + "%").attr("height", 1000).style("float", "right")
     .call(zm = d3.behavior.zoom().scaleExtent([0.25,3]).on("zoom", redraw)).on("dblclick.zoom", null).append("g")
     .attr("transform", "translate(" + 300 + "," + 50 + ")");
 	
-
-//necessary so that zoom knows where to zoom and unzoom from
-zm.translate([300, 50]);
 var nodes,
 	links,
 	node,
 	nodeEnter,
 	nodeUpdate,
 	additionalLink;
+	
+//necessary so that zoom knows where to zoom and unzoom from
+zm.translate([300, 50]);
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -128,28 +131,43 @@ function update(source) {
 		.on("dblclick", dblclick)
 		.on("mouseout", mouseout);
 		
-		
+	// Transition nodes to their new position.
+    nodeUpdate = node.transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+        return "translate(" + d.x + "," + d.y + ")";
+    });			
 
-    nodeEnter.append("rect")
-        .attr("width", rectW)
-		.attr("class","rect" )
-        .attr("height", rectH)
-        .attr("stroke", "white")
-        .attr("stroke-width", 1)
-		.on ("mouseover", function (){
-		tmpFill = d3.select(this);
-		if (this.attributes.style != "fill: white;")tmpFill.style("fill", "grey");
-		})
-		.on ("mouseout", function (){
-		if (this.attributes.style != "fill: red")tmpFill.style("fill", "white");
-		})
-        .style("fill", function (d) {
-        return d._children ? "lightsteelblue" : "#fff";
+    // Update the links…
+    var link = svg.selectAll("path.link")
+        .data(links, function (d) {
+        return d.target.id;
 		})
 		;
 	
-		
-		
+
+    // Enter any new links at the parent's previous position.
+    link.enter().insert("path", "g")
+        .attr("class", "link")
+        .attr("x", rectW / 2)
+        .attr("y", rectH / 2)
+        .attr("d", function (d) {
+		var o = {
+            x: source.x0,
+            y: source.y0
+        };
+        return diagonal({
+            source: o,
+            target: o
+        });
+    });
+
+    // Transition links to their new position.
+    link.transition()
+        .duration(duration)
+        .attr("d", diagonal);	
+	
+	
     nodeEnter.append("text")
         .attr("x", rectW / 2)
         .attr("y", rectH /2)
@@ -233,23 +251,6 @@ function update(source) {
 		});
 
 		
-    // Transition nodes to their new position.
-    nodeUpdate = node.transition()
-        .duration(duration)
-        .attr("transform", function (d) {
-        return "translate(" + d.x + "," + d.y + ")";
-    });
-
-    nodeUpdate.select("rect")
-        .attr("width", rectW)
-        .attr("height", rectH)
-        .attr("stroke", "white")
-        .attr("stroke-width", 1)
-        .style("fill", function (d) {
-        if (d._children)  {
-		return "lightsteelblue";}
-		else {return "#fff"};
-    });
 
     nodeUpdate.select("text")
         .style("fill-opacity", 1);
@@ -262,13 +263,7 @@ function update(source) {
     })
         .remove();
 
-    nodeExit.select("rect")
-        .attr("width", rectW)
-        .attr("height", rectH)
 
-    nodeExit.select("text");
-
-	
 	//images
 			
 	node.append("image")
@@ -318,37 +313,41 @@ function update(source) {
 		.attr("y", rectH - 110)
 		.attr("width", 40)
 		.attr("height", 40);	
-	
-	
-	
-    // Update the links…
-    var link = svg.selectAll("path.link")
-        .data(links, function (d) {
-        return d.target.id;
+
+    nodeEnter.append("rect")
+        .attr("width", rectW)
+		.attr("class",function (d){
+			return d._children ? "rectLightsteelblue" : "rectWhite"
 		})
-		;
-	
+        .attr("height", rectH)
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+		.on ("mouseover", function (){
+			tmpClass = $(this).attr('class');
+			console.log (tmpClass)
+			return d3.select(this).attr ("class", "rectGrey")
+		})
+		.on ("mouseout", function (){
+			return d3.select(this).attr ("class", tmpClass)
+		});
 
-    // Enter any new links at the parent's previous position.
-    link.enter().insert("path", "g")
-        .attr("class", "link")
-        .attr("x", rectW / 2)
-        .attr("y", rectH / 2)
-        .attr("d", function (d) {
-		var o = {
-            x: source.x0,
-            y: source.y0
-        };
-        return diagonal({
-            source: o,
-            target: o
-        });
-    });
+    nodeUpdate.select("rect")
+        .attr("width", rectW)
+        .attr("height", rectH)
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+		.attr("class", function (d){
+			return d._children ? "rectLightsteelblue" : "rectWhite"
+		});	
 
-    // Transition links to their new position.
-    link.transition()
-        .duration(duration)
-        .attr("d", diagonal);
+		
+    nodeExit.select("rect")
+        .attr("width", rectW)
+        .attr("height", rectH)
+
+    nodeExit.select("text");	
+		
+
 
     // Transition exiting nodes to the parent's new position.
     link.exit().transition()
@@ -416,6 +415,53 @@ function update(source) {
 	
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/* $(document).ready(function() {   
+	processHighlighting();
+});
+
+// events
+$('#highlighting-switch').change(function() {
+  processHighlighting();
+});
+
+$('#radio-based-on').change(function() {
+  processRadioBasedOn();
+});
+
+function processHighlighting() {
+	if ($("#highlighting-switch option:selected").val() == "on") {
+  	$("#radio-based-on input[type='radio']").checkboxradio("enable");
+  } else {
+  	$("#radio-based-on input[type='radio']").checkboxradio('disable');
+  }
+  processRadioBasedOn();
+}
+
+function processRadioBasedOn() {
+  if ($("#radio-based-on .ui-radio").hasClass("ui-disabled") == true || $("#radio-based-on :radio:checked").val() == "type") {
+    $("#focus-select").selectmenu("disable");
+  	$("#focus-select").find("option").remove();
+    $('<option value="none">---</option>').appendTo($("#focus-select"));
+    $("#focus-select").trigger("change");
+  } else {
+    $("#focus-select").selectmenu("enable");
+    $("#focus-select").find("option").remove();
+  	$('<option value="rows">Rows</option>').appendTo($("#focus-select"));
+    $('<option value="costs">Overall Costs</option>').appendTo($("#focus-select"));
+    $('<option value="costsCPU">CPU Costs</option>').appendTo($("#focus-select"));
+    $('<option value="costsIO">I/O Costs</option>').appendTo($("#focus-select"));
+    $("#focus-select").trigger("change");
+	$("#focus-select").change(function(){
+      var data= $(this).val();
+	  if (data == "rows"){console.log("option 1 selected")} 
+	  else if (data == "costs"){console.log("option 2 selected")}
+	  else if (data == "costsCPU"){console.log("option 3 selected")}
+	  else if (data == "costsIO"){console.log("option 4 selected")}
+    });
+  }
+}
+ */
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function evaCosts(){
 //coloured nodes for evaluation	
 	var totalCosts;
@@ -432,8 +478,19 @@ function evaCosts(){
         .attr("width", rectW)
         .attr("height", rectH)
         .attr("stroke", "white")
-        .attr("stroke-width", 1)
-         .style("fill", function (d) {
+        .attr("stroke-width", 1)	
+		.attr("class", function (d){
+			if (d.tagName != "executionPlan" && d.tagName != undefined) {
+				if (d.attributes.costs >= 0 && d.attributes.costs < totalCosts*0.1){return "rectBest"} 							//best
+				else if(d.attributes.costs >= totalCosts *0.1 && d.attributes.costs < totalCosts*0.25){return "rectVeryGood"}		//very good
+				else if(d.attributes.costs >= totalCosts *0.25 && d.attributes.costs < totalCosts*0.40){return "rectGood"}		//good
+				else if(d.attributes.costs >= totalCosts *0.40 && d.attributes.costs < totalCosts*0.60){return "rectFair"}		//fair
+				else if(d.attributes.costs >= totalCosts *0.60 && d.attributes.costs < totalCosts*0.75){return "rectBad"}		//bad
+				else if(d.attributes.costs >= totalCosts *0.75 && d.attributes.costs < totalCosts*0.90){return "rectVeryBad"}		//very bad
+				else {return"rectWorst"}																							//worst
+			} else {return "rectWhite"}
+		})
+        /*.style("fill", function (d) {
         if (d.tagName != "executionPlan" && d.tagName != undefined)  {			
 				if (d.attributes.costs >= 0 && d.attributes.costs < totalCosts*0.1){return "#3C3"} 							//best
 				else if(d.attributes.costs >= totalCosts *0.1 && d.attributes.costs < totalCosts*0.25){return "#9C3"}		//very good
@@ -445,19 +502,15 @@ function evaCosts(){
 			
 		}
 		else {return "#fff"};
-		}); 
+		});*/ 
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-function evaRows(){
-//coloured nodes for row evaluation	
-	var totalRows = 0.0;
+function evaCostsCPU(){
+//coloured nodes for evaluation	
+	var totalCostsCPU;
     nodes.forEach(function (d) {
-		if (d.tagName != undefined){
-			if (totalRows < d.attributes.rows) {totalRows = d.attributes.rows}
-		}
-
+		if (d.tagName == "executionPlan"){totalCostsCPU = d.attributes.totalCostsCPU}
     });
-		console.log(totalRows)
 		
 		node.transition()
         .duration(duration)
@@ -468,20 +521,86 @@ function evaRows(){
         .attr("width", rectW)
         .attr("height", rectH)
         .attr("stroke", "white")
-        .attr("stroke-width", 1)
-        .style("fill", function (d) {
-        if (d.tagName != "executionPlan" && d.tagName != undefined)  {			
-				if (d.attributes.rows >= 0 && d.attributes.rows < totalRows*0.1){return "#3C3"} 						//best
-				else if(d.attributes.rows >= totalRows *0.1 && d.attributes.rows < totalRows*0.25){return "#9C3"}		//very good
-				else if(d.attributes.rows >= totalRows *0.25 && d.attributes.rows < totalRows*0.40){return "#CC3"}		//good
-				else if(d.attributes.rows >= totalRows *0.40 && d.attributes.rows < totalRows*0.60){return "#FC3"}		//fair
-				else if(d.attributes.rows >= totalRows *0.60 && d.attributes.rows < totalRows*0.75){return "#F63"}		//bad
-				else if(d.attributes.rows >= totalRows *0.75 && d.attributes.rows < totalRows*0.90){return "#F33"}		//very bad
-				else {return"#C00"}																						//worst
-			
-		}
-		else {return "#fff"};
+        .attr("stroke-width", 1)	
+		.attr("class", function (d){
+			if (d.tagName != "executionPlan" && d.tagName != undefined) {
+				if (d.attributes.costsCPU >= 0 && d.attributes.costsCPU < totalCostsCPU*0.1){return "rectBest"} 							//best
+				else if(d.attributes.costsCPU >= totalCostsCPU *0.1 && d.attributes.costsCPU < totalCostsCPU*0.25){return "rectVeryGood"}		//very good
+				else if(d.attributes.costsCPU >= totalCostsCPU *0.25 && d.attributes.costsCPU < totalCostsCPU*0.40){return "rectGood"}		//good
+				else if(d.attributes.costsCPU >= totalCostsCPU *0.40 && d.attributes.costsCPU < totalCostsCPU*0.60){return "rectFair"}		//fair
+				else if(d.attributes.costsCPU >= totalCostsCPU *0.60 && d.attributes.costsCPU < totalCostsCPU*0.75){return "rectBad"}		//bad
+				else if(d.attributes.costsCPU >= totalCostsCPU *0.75 && d.attributes.costsCPU < totalCostsCPU*0.90){return "rectVeryBad"}		//very bad
+				else {return"rectWorst"}																							//worst
+			} else {return "rectWhite"}
+		}) 
+}
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function evaCostsIO(){
+//coloured nodes for evaluation	
+	var totalCostsIO;
+    nodes.forEach(function (d) {
+		if (d.tagName == "executionPlan"){totalCostsIO = d.attributes.totalCostsIO}
     });
+		
+		node.transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+        return "translate(" + d.x + "," + d.y + ")";
+		})
+		.select("rect")
+        .attr("width", rectW)
+        .attr("height", rectH)
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)	
+		.attr("class", function (d){
+			if (d.tagName != "executionPlan" && d.tagName != undefined) {
+				if (d.attributes.costsIO >= 0 && d.attributes.costsIO < totalCostsIO*0.1){return "rectBest"} 							//best
+				else if(d.attributes.costsIO >= totalCostsIO *0.1 && d.attributes.costsIO < totalCostsIO*0.25){return "rectVeryGood"}		//very good
+				else if(d.attributes.costsIO >= totalCostsIO *0.25 && d.attributes.costsIO < totalCostsIO*0.40){return "rectGood"}		//good
+				else if(d.attributes.costsIO >= totalCostsIO *0.40 && d.attributes.costsIO < totalCostsIO*0.60){return "rectFair"}		//fair
+				else if(d.attributes.costsIO >= totalCostsIO *0.60 && d.attributes.costsIO < totalCostsIO*0.75){return "rectBad"}		//bad
+				else if(d.attributes.costsIO >= totalCostsIO *0.75 && d.attributes.costsIO < totalCostsIO*0.90){return "rectVeryBad"}		//very bad
+				else {return"rectWorst"}																							//worst
+			} else {return "rectWhite"}
+		}) 
+}
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+function evaRows(){
+//coloured nodes for row evaluation	
+	var rowsArray = new Array;
+	var i = 0;
+    nodes.forEach(function (d) {
+		if (d.tagName != undefined){
+			rowsArray[i] = d.attributes.rows;
+			i++;
+		}
+    });
+	var totalRows = Math.max(...rowsArray);	
+	
+	node.transition()
+	.duration(duration)
+	.attr("transform", function (d) {
+	return "translate(" + d.x + "," + d.y + ")";
+	})
+	.select("rect")
+	.attr("width", rectW)
+	.attr("height", rectH)
+	.attr("stroke", "white")
+	.attr("stroke-width", 1)
+	.attr("class", function(d){
+		if (d.tagName != undefined)  {			
+			if (d.attributes.rows >= 0 && d.attributes.rows < totalRows*0.1){return "rectBest"} 						//best
+			else if(d.attributes.rows >= totalRows *0.1 && d.attributes.rows < totalRows*0.25){return "rectVeryGood"}		//very good
+			else if(d.attributes.rows >= totalRows *0.25 && d.attributes.rows < totalRows*0.40){return "rectGood"}		//good
+			else if(d.attributes.rows >= totalRows *0.40 && d.attributes.rows < totalRows*0.60){return "rectFair"}		//fair
+			else if(d.attributes.rows >= totalRows *0.60 && d.attributes.rows < totalRows*0.75){return "rectBad"}		//bad
+			else if(d.attributes.rows >= totalRows *0.75 && d.attributes.rows < totalRows*0.90){return "rectVeryBad"}		//very bad
+			else {return"rectWorst"}																						//worst
+		
+		}
+		else {return "rectWhite"};			
+	})
 }	
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Show tooltip when mouse over		
@@ -554,6 +673,7 @@ function mouseout (d){
 
 // Collapse tree on double click.
 function dblclick(d) {
+	console.log(d)
 	if (d.children) {
 		d._children = d.children;
 		d.children = null;
@@ -561,7 +681,7 @@ function dblclick(d) {
 		d.children = d._children;
 		d._children = null;
 	}
-	update(d);
+	update(root);
 }
 
 //Redraw for zoom

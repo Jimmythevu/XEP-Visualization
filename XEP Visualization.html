@@ -2,12 +2,34 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<script>
+    $(document).bind('mobileinit',function(){
+        $.mobile.pushStateEnabled = false;
+    });
+</script>
+<script src="https://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.js"></script> 
+<link href = "https://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.css" type="text/css" rel="stylesheet"></link>
 <script src="http:d3js.org/d3.v3.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script> 
 <style type="text/css">
 
 
+.ui-field-contain .header-label.ui-slider {
+  font-family: Helvetica,Arial,sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 1px 0 #fff;
+  line-height: 36px;
+  width: auto;
+}
 
+.ui-field-contain div.ui-slider-switch {
+  width: 7em;
+}
+
+.ui-field-contain div.ui-select {
+  width: 15em;
+}
 
 .node text {
   font-size: 13px;
@@ -20,15 +42,53 @@ path.link {
 }
   
 .additionalParentLink {
-    fill: none;
-    stroke: blue;
-    stroke-width: 1.5px;
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
 }
+.rectWhite {
+	fill: white;
+	opacity: 0;
+}
+.rectGrey{
+	fill: gray;
+	opacity: 0.3;
 
-.node rect{
-	fill: blue;
 }
-  
+.rectLightsteelblue {
+	fill: Lightsteelblue;
+	opacity: 0.3;
+
+}
+.rectBest {
+	fill: #3C3;
+	opacity: 0.3;
+}
+.rectVeryGood{
+	fill: #9C3;
+	opacity: 0.3;
+}
+.rectGood {
+	fill: #CC3;
+	opacity: 0.3;
+
+}
+.rectFair{
+	fill: #FC3;
+	opacity: 0.3;
+}
+.rectBad{
+	fill: #F63;
+	opacity: 0.3;
+}
+.rectVeryBad {
+	fill: #F33;
+	opacity: 0.3;
+}
+.rectWorst{
+	fill: #C00;
+	opacity: 0.3;
+}  
 </style>
 </head>
 <body>
@@ -50,6 +110,34 @@ path.link {
            value="Evaluate Rows" 
            onclick="evaRows()" />
 </div>
+<!-- <div id="controls">
+  <div data-role="fieldcontain">
+    <label for="highlighting-switch" class="header-label">Highlighting</label>
+    <select name="highlighting-switch" id="highlighting-switch" data-role="slider" class="header-widget">
+      <option value="off">Off</option>
+      <option value="on">On</option>
+    </select> 
+  </div>
+  <div data-role="fieldcontain">
+   <fieldset data-role="controlgroup" data-mini="true" data-type="horizontal" name="radio-based-on" id="radio-based-on" > 
+      <legend>Based on: </legend>
+        <input type="radio" name="radio-based-on" id="radio-based-on-type" value="type" checked="checked" />
+        <label for="radio-based-on-type">Operator Type</label>
+        <input type="radio" name="radio-based-on" id="radio-based-on-accounting" value="accounting"  />
+        <label for="radio-based-on-accounting">Accounting Data</label>
+     </fieldset>
+     <label for="focus-select" class="select">Focus: </label>
+    <select name="focus-select" id="focus-select" data-mini="true">
+    </select> 
+    </div>
+    <div data-role="fieldcontain">
+    <label for="recommendations-switch" class="header-label">Recommendations</label>
+    <select name="recommendations-switch" id="recommendations-switch" data-role="slider" class="header-widget">
+      <option value="off">Off</option>
+      <option value="on">On</option>
+    </select> 
+  </div>
+</div> -->
 </div><script type="text/javascript" src = "src/Script.js"></script>
-  </body>
+</body>
 </html>
