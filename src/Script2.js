@@ -51,35 +51,27 @@ right: 120,
 bottom: 20,
 left: 120
 },
-	width = 1200 - margin.right - margin.left,
-	height = 1400 - margin.top - margin.bottom,
-	i = 0,
+width = 1200 - margin.right - margin.left,
+height = 1400 - margin.top - margin.bottom;
+var i = 0,
 	root,
 	duration = 1000,
-	rectW = 230,
-	rectH = 120,
-	nodes,
-	links,
-	node,
-	nodeEnter,
-	nodeUpdate,
-	additionalLink;
+	rectW = 180,
+	rectH = 120;
 
-var tree = d3.layout.tree().nodeSize([240, 50]);
+var tree = d3.layout.tree().nodeSize([200, 50]);
 var diagonal = d3.svg.diagonal()
 	.projection(function (d) {
 	return [d.x + rectW / 2, d.y + rectH / 2];
 });
 
-var leftSVG = d3.select("body")
+/* var leftSVG = d3.select("body")
 	.append("svg")
 	.attr("width", 25 + "%")
 	.attr("height", 1000)
 	.attr("border", 1)
-	.style("background", "lightblue")
-	.style("opacity", 0.2)
 	.style("float", "left");
-/*
+
 var borderPath = d3.select("svg").append("rect")
 	.attr("x", 0)
 	.attr("y", 0)
@@ -94,7 +86,12 @@ var svg = d3.select("body").append("svg").attr("id", "graph").attr("width", 75 +
     .call(zm = d3.behavior.zoom().scaleExtent([0.25,3]).on("zoom", redraw)).on("dblclick.zoom", null).append("g")
     .attr("transform", "translate(" + 300 + "," + 50 + ")");
 	
-
+var nodes,
+	links,
+	node,
+	nodeEnter,
+	nodeUpdate,
+	additionalLink;
 	
 //necessary so that zoom knows where to zoom and unzoom from
 zm.translate([300, 50]);
@@ -108,6 +105,9 @@ function update(source) {
     nodes = tree.nodes(root).reverse();
     links = tree.links(nodes);
 		
+	if (additionalLink){
+		additionalLink.style("visibility","hidden")
+	}
     // Normalize for fixed-depth.
     nodes.forEach(function (d) {
         d.y = d.depth * 150;
@@ -125,13 +125,48 @@ function update(source) {
         .attr("class", "node")
         .attr("transform", function (d) {
         return "translate(" + d.x + "," + d.y + ")";
-    })
-    .on("click", click)
-	.on("mouseover", mouseover)
-	.on("dblclick", dblclick)
-	.on("mouseout", mouseout);
+    });
+    node.on("click", click)
+		.on("mouseover", mouseover)
+		.on("dblclick", dblclick)
+		.on("mouseout", mouseout);
+		
+	// Transition nodes to their new position.
+    nodeUpdate = node.transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+        return "translate(" + d.x + "," + d.y + ")";
+    });			
 
+    // Update the links…
+    var link = svg.selectAll("path.link")
+        .data(links, function (d) {
+        return d.target.id;
+		})
+		;
+	
 
+    // Enter any new links at the parent's previous position.
+    link.enter().insert("path", "g")
+        .attr("class", "link")
+        .attr("x", rectW / 2)
+        .attr("y", rectH / 2)
+        .attr("d", function (d) {
+		var o = {
+            x: source.x0,
+            y: source.y0
+        };
+        return diagonal({
+            source: o,
+            target: o
+        });
+    });
+
+    // Transition links to their new position.
+    link.transition()
+        .duration(duration)
+        .attr("d", diagonal);	
+	
 	
     nodeEnter.append("text")
         .attr("x", rectW / 2)
@@ -139,24 +174,15 @@ function update(source) {
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .text(function (d) {
-		if (d.tagName == "tableAccess" || 
-			d.tagName == "tableDelete" || 
-			d.tagName == "tableInsert" || 
-			d.tagName == "tableUpdate" || 
-			d.tagName == "tableMerge"){
+		if (d.tagName == "executionPlan") return d.tagName
+		else if (d.tagName == "tableAccess" || d.tagName == "tableDelete" || d.tagName == "tableInsert" || d.tagName == "tableUpdate" || d.tagName == "tableMerge"){
 		return d.tagName + "[" + d.attributes.tableType + "]"
 		}
-		else if (d.tagName == "indexAccess" || 
-				d.tagName == "indexDelete" || 
-				d.tagName == "indexInsert" || 
-				d.tagName == "indexUpdate" || 
-				d.tagName == "indexMerge"){
+		else if (d.tagName == "indexAccess" || d.tagName == "indexDelete" || d.tagName == "indexInsert" || d.tagName == "indexUpdate" || d.tagName == "indexMerge"){
 		return d.tagName + "[" + d.attributes.indexType + "]"
 		}
-		else if (d.tagName != undefined || 
-				d.tagName == "executionPlan") return d.tagName
+		else if (d.tagName != undefined) return d.tagName
 		});
-		
 	nodeEnter.append("text")
 		.attr("transform","translate(0,12)")
 		.attr("x", rectW / 2)
@@ -165,17 +191,9 @@ function update(source) {
         .attr("text-anchor", "middle")
         .text(function (d) {
 		if (d.tagName == "executionPlan"){return "StatementType: " + d.attributes.statementType}
-		else if (d.tagName == "indexAccess" || 
-				d.tagName == "indexDelete" || 
-				d.tagName == "indexInsert" || 
-				d.tagName == "indexUpdate" || 
-				d.tagName == "indexMerge"){
+		else if (d.tagName == "indexAccess" || d.tagName == "indexDelete" || d.tagName == "indexInsert" || d.tagName == "indexUpdate" || d.tagName == "indexMerge"){
 			return d.attributes.indexSchema  + "." + d.attributes.indexName}
-		else if (d.tagName == "tableAccess" || 
-				d.tagName == "tableDelete" || 
-				d.tagName == "tableInsert" || 
-				d.tagName == "tableUpdate" || 
-				d.tagName == "tableMerge"){
+		else if (d.tagName == "tableAccess" || d.tagName == "tableDelete" || d.tagName == "tableInsert" || d.tagName == "tableUpdate" || d.tagName == "tableMerge"){
 			return d.attributes.tableSchema + "." + d.attributes.tableName}		
 		else if (d.tagName != undefined) {return "rows: " + d.attributes.rows}
 		});
@@ -186,17 +204,9 @@ function update(source) {
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .text(function (d) {
-		if (	d.tagName == "indexAccess" || 
-				d.tagName == "indexDelete" || 
-				d.tagName == "indexInsert" || 
-				d.tagName == "indexUpdate" || 
-				d.tagName == "indexMerge"){
+		if (d.tagName == "indexAccess" || d.tagName == "indexDelete" || d.tagName == "indexInsert" || d.tagName == "indexUpdate" || d.tagName == "indexMerge"){
 			return "rows: " + d.attributes.rows}
-		else if (d.tagName == "tableAccess" || 
-				d.tagName == "tableDelete" || 
-				d.tagName == "tableInsert" || 
-				d.tagName == "tableUpdate" || 
-				d.tagName == "tableMerge"){
+		else if (d.tagName == "tableAccess" || d.tagName == "tableDelete" || d.tagName == "tableInsert" || d.tagName == "tableUpdate" || d.tagName == "tableMerge"){
 			return "rows: " + d.attributes.rows}
 		else if (d.tagName != undefined) {return "Costs Total/CPU/IO:"}
 			
@@ -209,17 +219,9 @@ function update(source) {
         .attr("text-anchor", "middle")
         .text(function (d) {
 		if (d.tagName == "executionPlan"){return d.attributes.totalCosts + " / " + d.attributes.totalCostsCPU + " / " + d.attributes.totalCostsIO}
-		else if (d.tagName == "indexAccess" || 
-				d.tagName == "indexDelete" || 
-				d.tagName == "indexInsert" || 
-				d.tagName == "indexUpdate" || 
-				d.tagName == "indexMerge"){
+		else if (d.tagName == "indexAccess" || d.tagName == "indexDelete" || d.tagName == "indexInsert" || d.tagName == "indexUpdate" || d.tagName == "indexMerge"){
 			return "Costs Total/CPU/IO:"}
-		else if (d.tagName == "tableAccess" || 
-				d.tagName == "tableDelete" || 
-				d.tagName == "tableInsert" || 
-				d.tagName == "tableUpdate" || 
-				d.tagName == "tableMerge"){
+		else if (d.tagName == "tableAccess" || d.tagName == "tableDelete" || d.tagName == "tableInsert" || d.tagName == "tableUpdate" || d.tagName == "tableMerge"){
 			return "Costs Total/CPU/IO:"}
 		else if (d.tagName != undefined){return d.attributes.costs + " / " + d.attributes.costsCPU + " / " + d.attributes.costsIO}
 		});
@@ -232,11 +234,7 @@ function update(source) {
         .text(function (d) {
 		if (d.tagName == "executionPlan"){
 		return ""}
-		else if (d.tagName == "indexAccess" || 
-				d.tagName == "indexDelete" || 
-				d.tagName == "indexInsert" || 
-				d.tagName == "indexUpdate" || 
-				d.tagName == "indexMerge"){
+		else if (d.tagName == "indexAccess" || d.tagName == "indexDelete" || d.tagName == "indexInsert" || d.tagName == "indexUpdate" || d.tagName == "indexMerge"){
 			return d.attributes.costs + " / " + d.attributes.costsCPU + " / " + d.attributes.costsIO}
 		});
 	nodeEnter.append("text")
@@ -248,15 +246,23 @@ function update(source) {
         .text(function (d) {
 		if (d.tagName == "executionPlan"){
 		return ""}
-		else if (d.tagName == "tableAccess" || 
-				d.tagName == "tableDelete" || 
-				d.tagName == "tableInsert" || 
-				d.tagName == "tableUpdate" || 
-				d.tagName == "tableMerge"){
+		else if (d.tagName == "tableAccess" || d.tagName == "tableDelete" || d.tagName == "tableInsert" || d.tagName == "tableUpdate" || d.tagName == "tableMerge"){
 				return d.attributes.costs + " / " + d.attributes.costsCPU + " / " + d.attributes.costsIO}
 		});
 
 		
+
+    nodeUpdate.select("text")
+        .style("fill-opacity", 1);
+
+    // Transition exiting nodes to the parent's new position.
+    var nodeExit = node.exit().transition()
+        .duration(duration)
+        .attr("transform", function (d) {
+        return "translate(" + source.x + "," + source.y + ")";
+    })
+        .remove();
+
 
 	//images
 			
@@ -324,20 +330,8 @@ function update(source) {
 		.on ("mouseout", function (){
 			return d3.select(this).attr ("class", tmpClass)
 		});
-		
-	// Transition nodes to their new position.
-    nodeUpdate = node.transition()
-        .duration(duration)
-        .attr("transform", function (d) {
-        return "translate(" + d.x + "," + d.y + ")";
-    });			
-		
-    nodeUpdate.select("text")
-        .style("fill-opacity", 1);
-		
+
     nodeUpdate.select("rect")
-		.attr("ry", 20)
-		.attr("rx", 20)
         .attr("width", rectW)
         .attr("height", rectH)
         .attr("stroke", "white")
@@ -346,13 +340,6 @@ function update(source) {
 			return d._children ? "rectLightsteelblue" : "rectWhite"
 		});	
 
-    // Transition exiting nodes to the parent's new position.
-    var nodeExit = node.exit().transition()
-        .duration(duration)
-        .attr("transform", function (d) {
-        return "translate(" + source.x + "," + source.y + ")";
-    })
-        .remove();
 		
     nodeExit.select("rect")
         .attr("width", rectW)
@@ -360,34 +347,7 @@ function update(source) {
 
     nodeExit.select("text");	
 		
-    // Update the links…
-    var link = svg.selectAll("path.link")
-        .data(links, function (d) {
-        return d.target.id;
-		})
-		;
-	
-    // Enter any new links at the parent's previous position.
-    link.enter().insert("path", "g")
-        .attr("class", "link")
-        .attr("x", rectW / 2)
-        .attr("y", rectH / 2)
-        .attr("d", function (d) {
-		var o = {
-            x: source.x0,
-            y: source.y0
-        };
-        return diagonal({
-            source: o,
-            target: o
-        });
-    });
 
-    // Transition links to their new position.
-    link.transition()
-        .duration(duration)
-        .attr("d", diagonal);	
-	
 
     // Transition exiting nodes to the parent's new position.
     link.exit().transition()
@@ -410,15 +370,52 @@ function update(source) {
         d.y0 = d.y;
     });
 	
-	
-	// Remove old additional Link
-	svg.selectAll("path.additionalParentLink").remove();
-	
+	svg.selectAll("path.additionalParentLink").style("visibility", "hidden")
+	var couplingParent1;
+	nodes.forEach(function(d){
+		if (d.tagName == "tableInsert"){
+			var tmp = d.attributes.tableName;
+			nodes.forEach(function(c){
+				if (c.tagName == "tableAccess" && c.attributes.tableName == tmp && (c.children == undefined || c.children[0].tagName != "tableInsert")){
+					couplingParent1 = c;
+				}
+			})
+		}
+	});
+
+	var couplingChild1;
+	nodes.forEach(function(d){
+		if (d.tagName == "tableInsert" && d.attributes.tableName == couplingParent1.attributes.tableName ){ couplingChild1 = d}
+	});
+
+	multiParents = [{
+		parent: couplingParent1,
+		child: couplingChild1
+	}];
+
+	additionalLink = multiParents.forEach(function(multiPair){
+		svg.append("path", "g")
+		.attr("class", "additionalParentLink")
+		.style("visibility", "visible")
+		.attr("d", function(){
+			var oTarget = {
+				x:multiPair.parent.x0,
+				y:multiPair.parent.y0
+			};
+			var oSource = {
+				x: multiPair.child.x0,
+				y: multiPair.child.y0
+			};
+			return diagonal ({
+				source: oSource,
+				target: oTarget
+			});
+		});
+	});	
 	
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/* $(document).ready(function() {
-	initEventListner();
+/* $(document).ready(function() {   
 	processHighlighting();
 });
 
@@ -430,16 +427,6 @@ $('#highlighting-switch').change(function() {
 $('#radio-based-on').change(function() {
   processRadioBasedOn();
 });
-
-function initEventListner() {
-	$('#highlighting-switch').change(function() {
-	  processHighlighting();
-	});
-
-	$('#radio-based-on').change(function() {
-	  processRadioBasedOn();
-	});
-}
 
 function processHighlighting() {
 	if ($("#highlighting-switch option:selected").val() == "on") {
@@ -473,7 +460,7 @@ function processRadioBasedOn() {
     });
   }
 }
-  */
+ */
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function evaCosts(){
 //coloured nodes for evaluation	
@@ -627,6 +614,7 @@ var tooltip = d3.select("body").append("div")
 			   
 			   
 function mouseover (d){
+
 	var content ="";
 	if (d.attributes){
 	  content +=
@@ -685,6 +673,7 @@ function mouseout (d){
 
 // Collapse tree on double click.
 function dblclick(d) {
+	console.log(d)
 	if (d.children) {
 		d._children = d.children;
 		d.children = null;
@@ -692,7 +681,7 @@ function dblclick(d) {
 		d.children = d._children;
 		d._children = null;
 	}
-	update(d);
+	update(root);
 }
 
 //Redraw for zoom
@@ -702,53 +691,5 @@ function redraw() {
 	  + " scale(" + d3.event.scale + ")");
 }
 
-function showAdditionalLink(){
-	
-	var couplingParent1;
-	nodes.forEach(function(d){
-		if (d.tagName == "tableInsert"){
-			var tmp = d.attributes.tableName;
-			nodes.forEach(function(c){
-				if (c.tagName == "tableAccess" && c.attributes.tableName == tmp && (c.children == undefined || c.children[0].tagName != "tableInsert")){
-					couplingParent1 = c;
-				}
-			})
-		}
-	});
-
-	var couplingChild1;
-	nodes.forEach(function(d){
-		if (d.tagName == "tableInsert" && d.attributes.tableName == couplingParent1.attributes.tableName ){ couplingChild1 = d}
-	});
-
-	multiParents = [{
-		parent: couplingParent1,
-		child: couplingChild1
-	}];
-
-	additionalLink = multiParents.forEach(function(multiPair){
-		svg.append("path", "g")
-		.attr("class", "additionalParentLink")
-		.style("visibility", "visible")
-		.attr("d", function(){
-			var oTarget = {
-				x:multiPair.parent.x0,
-				y:multiPair.parent.y0
-			};
-			var oSource = {
-				x: multiPair.child.x0,
-				y: multiPair.child.y0
-			};
-			return diagonal ({
-				source: oSource,
-				target: oTarget
-			});
-		});
-	});	
-	
-}
-function hideAddtionalLink(){
-		svg.selectAll("path.additionalParentLink").remove();
-}
 //-------------------------------------------------------------------------------- 
 
