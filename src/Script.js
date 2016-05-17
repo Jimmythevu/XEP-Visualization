@@ -138,6 +138,7 @@ function update(source) {
         .attr("y", rectH /2)
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
+		.attr("font-weight", "bold")
         .text(function (d) {
 		if (d.tagName == "tableAccess" || 
 			d.tagName == "tableDelete" || 
