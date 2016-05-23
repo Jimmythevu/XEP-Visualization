@@ -10,8 +10,8 @@
     });
 </script>
 <script src="https://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.js"></script> 
-<link href = "https://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.css" type="text/css" rel="stylesheet"></link> -->
-<!-- <script>
+<link href = "https://code.jquery.com/mobile/1.1.1/jquery.mobile-1.1.1.min.css" type="text/css" rel="stylesheet"></link>
+<script>
     $(document).bind('mobileinit',function(){
         $.mobile.pushStateEnabled = false;
     });
@@ -43,7 +43,7 @@
   font-size: 13px;
 }
 .nodeNormal{
-	fill: black;
+	fill: none;
 }
 .nodeSelected{
 	fill:blue;
@@ -62,8 +62,7 @@ path.link {
   stroke: #ccc;
   stroke-width: 2px;
 }
-.node rect{
-}
+
 .rectWhite {
 	fill: white;
 	opacity: 0;
@@ -112,7 +111,7 @@ path.link {
 </style>
 </head>
 <body>
-<!-- <div id="option" align = "right">
+<div id="option" align = "right">
     <input name="updateButton" 
            type="button" 
            value="Normal" 
@@ -141,7 +140,7 @@ path.link {
            type="button" 
            value="Hide Additional Link" 
            onclick="hideAddtionalLink()" />
-</div> -->
+</div>
 <!-- <div id="controls">
   <div data-role="fieldcontain">
     <label for="highlighting-switch" class="header-label">Highlighting</label>
@@ -170,6 +169,27 @@ path.link {
     </select> 
   </div> 
 </div> -->
-</div><script type="text/javascript" src = "src/Script.js"></script>
+</div>
+<script type="text/javascript" src = "src/xmlToJSON().js"></script>
+<script type="text/javascript" src = "src/mouseover().js"></script>
+<script type="text/javascript" src = "src/mouseout().js"></script>
+<script type="text/javascript" src = "src/click().js"></script>
+<script type="text/javascript" src = "src/dblclick().js"></script>
+<script type="text/javascript" src = "src/redraw().js"></script>
+<script type="text/javascript" src = "src/showAdditionalLink().js"></script>
+<script type="text/javascript" src = "src/hideAdditionalLink().js"></script>
+<script type="text/javascript" src = "src/evaRows().js"></script>
+<script type="text/javascript" src = "src/evaCostsIO().js"></script>
+<script type="text/javascript" src = "src/evaCostsCPU().js"></script>
+<script type="text/javascript" src = "src/evaCosts().js"></script>
+<script type="text/javascript" src = "src/enterNodes().js"></script>
+<script type="text/javascript" src = "src/updateNodes().js"></script>
+<script type="text/javascript" src = "src/updateLinks().js"></script>
+<script type="text/javascript" src = "src/appendRect().js"></script>
+<script type="text/javascript" src = "src/appendText().js"></script>
+<script type="text/javascript" src = "src/appendImages().js"></script>
+
+
+<script type="text/javascript" src = "src/Script.js"></script>
 </body>
 </html>
