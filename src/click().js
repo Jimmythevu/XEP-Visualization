@@ -1,7 +1,7 @@
 //tooltip on click				
 var tooltip2 = d3.select("body").append("div")
 	.attr("class", "tooltip2")
-	.style("width", 20 + "%")
+	.style("width", 24 + "%")
 	.style({position:"absolute",
 		visibility:"hidden"});
 		

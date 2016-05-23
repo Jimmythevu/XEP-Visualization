@@ -3,7 +3,7 @@ var tooltip = d3.select("body").append("div")
 		.attr("class", "tooltip")
 		.attr("stroke", "black")
 		.attr("stroke-width", 1)
-		.style("width", 20 + "%")
+		.style("width", 24 + "%")
 		.style({position:"absolute",
 			   visibility:"hidden"});		   
 			   
